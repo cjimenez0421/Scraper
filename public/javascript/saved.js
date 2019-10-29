@@ -69,6 +69,32 @@ $(document).ready(function() {
    articleContainer.append(emptyAlert);
     }
 
+    function renderNotesList(data) {
+        var notesToRender = [];
+        var currentNote;
+        if(!data.notes.length) {
+            currentNote = [
+                "<li class='list-group-item'>",
+                "No notes for this article yet.",
+                "</li>"
+            ].join("");
+            notesToRender.push(currentNote);
+        }
+        else {
+            for (var i=0; i <data.notes.length; i++) {
+                currentNote = $([
+                    "<li class='list-group-item note'>",
+                    data.notes[i].noteText,
+                    "<button class='btn btn-danger note-delete'>x</button>",
+                    "<li>"
+                ].join(""));
+                currentNote.children("button").data("_id", data.notes[i]._id);
+                notesToRender.push(currentNote);
+            }
+        }
+        $(".note-container").append(notesToRender);
+    }
+
     function handleArticleDelete() {
 
         var articleToDelete = $(this).parents(".panel").data();
@@ -113,11 +139,29 @@ $(document).ready(function() {
         });
     }
 
-    function handleArticleScrape() {
-    $.get("/api/fetch")
-    .then(function(data) {
-        initPage();
-        bootbox.alert("<h3 class='text-center m-top-80'>" + data.message + "<h3>");
-    });
-}
+    function handleNoteSave() {
+        var noteData;
+        var newNote = $(".bootbox-body text area").val().trim();
+
+        if(newNote) {
+            noteData = {
+                _id: $(this).data("article")._id,
+                noteText: newNote
+            };
+            $.post("/api/notes", noteData).then(function() {
+                bootbox.hideAll();
+            });
+        }
+    }
+
+    function handleNoteDelete() {
+
+        var noteToDelete = $(this).data("_id");
+        $.ajax({
+            url: "/api/notes/" + noteToDelete,
+            method: "DELETE"
+        }).then(function() {
+            bootbox.hideAll();
+        });
+    }    
 });
