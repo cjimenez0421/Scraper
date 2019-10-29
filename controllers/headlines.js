@@ -28,5 +28,10 @@ module.exports = {
         .exec(function(err, doc) {
             cb(doc);
         });
+    },
+    update: function(query, cb) {
+        Headline.update({_id: query._id}, {
+            $set: query
+        }, {}, cb);
     }
-}
+};
