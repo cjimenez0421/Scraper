@@ -1,18 +1,18 @@
-var request = require("request");
+var axios = require("axios");
 var cheerio = require("cheerio");
 
-var scrape = function (cb) {
+var scrape = function () {
 
-    request("https://www.espn.com/", function(err, res, body){
+    return axios.get("https://www.nytimes.com").then(function(res) {
 
-        var $ = cheerio.load(body);
+        var $ = cheerio.load(res.data);
 
         var articles = [];
 
-        $(".theme-summary").each(function(i, element){
+        $(".assetWrapper").each(function(i, element){
 
-            var head = $(this).children(".story-heading").text().trim();
-            var sum = $(this).children(".summary").text().trim();
+            var head = $(this).find("h2").text().trim();
+            var sum = $(this).find("p").text().trim();
 
             if(head && sum){
                 var headNeat = head.replace(/(\r\n|\n|\r|\t|\s+)/gm, " ").trim();
@@ -26,7 +26,7 @@ var scrape = function (cb) {
                 articles.push(dataToAdd);
             }
         });
-        cb(articles);
+        return articles;
     });
 };
 
